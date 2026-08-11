@@ -1,0 +1,116 @@
+@import "tailwindcss";
+
+/* ---------------------------------------------------------------------------
+   Ubytování Vážka — design tokens
+
+   The palette comes from the insect the house is named after: a dragonfly wing
+   shifts teal → violet → bronze depending on the angle it catches light. That
+   iridescence is the accent system. It never appears as a flat fill — only as
+   a gradient across a stroke, a rule, or a hover state.
+
+   The ground is pond-water ink rather than black, so the rooms' own strong
+   colours (pink, green, red) read as jewel tones set into it instead of
+   fighting it.
+--------------------------------------------------------------------------- */
+
+@theme {
+  --color-ink: #0c1917;
+  --color-ink-raised: #11201e;
+  --color-ink-edge: #1b302c;
+  --color-bone: #ede7dc;
+  --color-bone-dim: #a5aeA8;
+  --color-bone-faint: #74827b;
+
+  --color-teal: #3fa89b;
+  --color-violet: #6e5a9e;
+  --color-bronze: #b98a4e;
+
+  --font-display: var(--font-bodoni), "Times New Roman", serif;
+  --font-body: var(--font-archivo), system-ui, sans-serif;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* clear the fixed header when jumping to an anchor */
+    scroll-padding-top: 6rem;
+  }
+
+  body {
+    background-color: var(--color-ink);
+    color: var(--color-bone);
+    font-family: var(--font-body);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Czech stacks a lot of accents; keep them off the line above */
+  h1,
+  h2,
+  h3 {
+    line-height: 1.08;
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background-color: var(--color-bronze);
+    color: var(--color-ink);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-teal);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+}
+
+@utility eyebrow {
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-bone-faint);
+}
+
+/* The iridescent hairline — the wing's colour shift compressed into 1px. */
+@utility iridescent-rule {
+  height: 1px;
+  background-image: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-teal) 18%,
+    var(--color-violet) 50%,
+    var(--color-bronze) 82%,
+    transparent 100%
+  );
+  opacity: 0.5;
+}
+
+@utility iridescent-text {
+  background-image: linear-gradient(
+    100deg,
+    var(--color-teal),
+    var(--color-violet) 46%,
+    var(--color-bronze)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
