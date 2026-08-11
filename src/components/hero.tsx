@@ -1,11 +1,9 @@
 "use client";
 
 import { motion, useReducedMotion } from "framer-motion";
-import Image from "next/image";
 import { ArrowDown } from "lucide-react";
 
 import { contact } from "@/lib/content";
-import { photo } from "@/lib/utils";
 import { Wing } from "./wing";
 
 const WORDS = ["Ubytování", "Vážka"];
@@ -71,34 +69,10 @@ export function Hero() {
           </div>
         </motion.div>
 
-        {/* three rooms, three temperaments — the house's actual range */}
-        <motion.div
-          {...rise(4)}
-          className="mt-16 grid grid-cols-3 gap-3 sm:mt-20 sm:max-w-lg sm:gap-4"
-        >
-          {(["apartman-zeleny-loznice", "apartman-ruzovy-loznice", "apartman-cerveny-loznice"] as const).map(
-            (slug, i) => (
-              <div
-                key={slug}
-                className="relative aspect-[3/4] overflow-hidden rounded-xl border border-ink-edge"
-              >
-                <Image
-                  src={photo(slug)}
-                  alt=""
-                  fill
-                  sizes="(max-width: 640px) 30vw, 160px"
-                  className="object-cover"
-                  preload={i === 0}
-                />
-              </div>
-            )
-          )}
-        </motion.div>
-
         <motion.a
-          {...rise(5)}
+          {...rise(4)}
           href="#ubytovani"
-          className="mt-16 inline-flex items-center gap-2 text-sm text-bone-faint transition-colors hover:text-bone"
+          className="mt-20 inline-flex items-center gap-2 text-sm text-bone-faint transition-colors hover:text-bone"
         >
           <ArrowDown size={14} />
           Prohlédnout pokoje
