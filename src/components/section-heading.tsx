@@ -18,7 +18,7 @@ export function SectionHeading({
   return (
     <Reveal>
       <div className="flex items-center gap-3">
-        <WingMark className="h-3 w-12 shrink-0" />
+        <WingMark className="h-6 w-8 shrink-0" />
         <span className="eyebrow">{eyebrow}</span>
       </div>
 

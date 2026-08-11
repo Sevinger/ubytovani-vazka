@@ -68,13 +68,16 @@ export const rooms: Room[] = [
       "Vlastní koupelna",
       "TV a Wi-Fi",
     ],
+    // Ordered by native resolution: the sharpest frame leads, and
+    // apartman-ruzovy-sezeni (244px wide) is left to the gallery, where the
+    // tiles are small enough for it to hold up.
     photos: [
-      "apartman-ruzovy-loznice",
-      "apartman-ruzovy-obyvaci",
-      "apartman-ruzovy-jidelni",
-      "apartman-ruzovy-sezeni",
       "apartman-cerveny-loznice",
+      "apartman-ruzovy-obyvaci",
+      "apartman-ruzovy-loznice",
+      "apartman-ruzovy-detail",
       "apartman-cerveny-kuchyn",
+      "apartman-ruzovy-jidelni",
     ],
     accent: "ruzovy",
   },
@@ -92,9 +95,9 @@ export const rooms: Room[] = [
       "TV a Wi-Fi",
     ],
     photos: [
-      "apartman-zeleny-loznice",
-      "apartman-zeleny-kuchyn",
       "apartman-zeleny-jidelni",
+      "apartman-zeleny-kuchyn",
+      "apartman-zeleny-loznice",
       "apartman-zeleny-vstup",
     ],
     accent: "zeleny",
@@ -114,9 +117,9 @@ export const rooms: Room[] = [
     ],
     photos: [
       "pokoj-trojluzkovy",
-      "pokoj-tv-jidelni",
       "pokoj-fialovy",
       "kuchyn-spolecna",
+      "koupelna-sklo",
     ],
     accent: "pokoj",
   },

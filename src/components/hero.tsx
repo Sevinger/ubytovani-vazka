@@ -31,7 +31,7 @@ export function Hero() {
       {/* the wing sits behind the title, bled off the right edge */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-24 top-24 w-[560px] max-w-none opacity-70 sm:-right-16 sm:w-[760px] lg:right-0 lg:w-[900px]"
+        className="pointer-events-none absolute -right-28 top-24 w-[460px] max-w-none opacity-40 sm:-right-16 sm:top-16 sm:w-[600px] lg:-right-4 lg:top-10 lg:w-[720px]"
       >
         <Wing delay={0.35} className="w-full" />
       </div>
@@ -80,7 +80,7 @@ export function Hero() {
             (slug, i) => (
               <div
                 key={slug}
-                className="relative aspect-[3/4] overflow-hidden rounded-sm border border-ink-edge"
+                className="relative aspect-[3/4] overflow-hidden rounded-xl border border-ink-edge"
               >
                 <Image
                   src={photo(slug)}

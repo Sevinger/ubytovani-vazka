@@ -2,8 +2,8 @@
 
 import { AnimatePresence, motion } from "framer-motion";
 import Image from "next/image";
-import { Check } from "lucide-react";
-import { useState } from "react";
+import { Check, ChevronLeft, ChevronRight } from "lucide-react";
+import { useCallback, useState } from "react";
 
 import { rooms } from "@/lib/content";
 import { cn, photo } from "@/lib/utils";
@@ -21,6 +21,12 @@ export function Ubytovani() {
     setActiveId(id);
     setFrame(0);
   };
+
+  const step = useCallback(
+    (delta: number) =>
+      setFrame((i) => (i + delta + active.photos.length) % active.photos.length),
+    [active.photos.length]
+  );
 
   return (
     <section id="ubytovani" className="scroll-mt-24 py-24 sm:py-32">
@@ -113,49 +119,86 @@ export function Ubytovani() {
 
           {/* viewer */}
           <Reveal delay={0.1} className="order-1 lg:order-2">
-            <div className="relative aspect-[4/5] overflow-hidden rounded-sm border border-ink-edge bg-ink-raised sm:aspect-[4/3] lg:aspect-[4/5]">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={lead}
-                  initial={{ opacity: 0, scale: 1.03 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.6, ease: [0.22, 1, 0.36, 1] }}
-                  className="absolute inset-0"
-                >
-                  <Image
-                    src={photo(lead)}
-                    alt={`${active.name} — Ubytování Vážka Mohelnice`}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 620px"
-                    className="object-cover"
-                  />
-                </motion.div>
-              </AnimatePresence>
-
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-ink/85 to-transparent" />
-
-              <div className="absolute inset-x-0 bottom-0 flex items-center justify-between gap-4 p-4">
-                <span className="text-xs text-bone-dim">
-                  {active.name}
-                </span>
-                <div className="flex gap-1.5">
-                  {active.photos.map((p, i) => (
-                    <button
-                      key={p}
-                      type="button"
-                      onClick={() => setFrame(i)}
-                      aria-label={`Fotografie ${i + 1} z ${active.photos.length}`}
-                      aria-current={i === frame}
-                      className={cn(
-                        "h-1.5 rounded-full transition-all",
-                        i === frame
-                          ? "w-6 bg-bone"
-                          : "w-1.5 bg-bone/35 hover:bg-bone/60"
-                      )}
+            <div
+              className="group/viewer mx-auto w-full max-w-[560px] lg:mx-0 lg:ml-auto"
+              tabIndex={0}
+              role="group"
+              aria-label={`Fotografie — ${active.name}`}
+              onKeyDown={(e) => {
+                if (e.key === "ArrowRight") step(1);
+                if (e.key === "ArrowLeft") step(-1);
+              }}
+            >
+              {/* 3:2 is how these rooms were actually photographed, so the frame
+                  crops far less than the portrait box it replaces — and the
+                  560px cap keeps modest sources from being upscaled. */}
+              <div className="relative aspect-[3/2] overflow-hidden rounded-2xl border border-ink-edge bg-ink-raised">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={lead}
+                    initial={{ opacity: 0, scale: 1.02 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
+                    className="absolute inset-0"
+                  >
+                    <Image
+                      src={photo(lead)}
+                      alt={`${active.name} — Ubytování Vážka Mohelnice`}
+                      fill
+                      sizes="(max-width: 640px) 92vw, 560px"
+                      quality={90}
+                      className="object-cover"
                     />
-                  ))}
-                </div>
+                  </motion.div>
+                </AnimatePresence>
+
+                <button
+                  type="button"
+                  onClick={() => step(-1)}
+                  aria-label="Předchozí fotografie"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 rounded-full bg-ink/70 p-2.5 text-bone backdrop-blur-sm transition-all hover:bg-ink lg:opacity-0 lg:group-hover/viewer:opacity-100 lg:focus-visible:opacity-100"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => step(1)}
+                  aria-label="Další fotografie"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-ink/70 p-2.5 text-bone backdrop-blur-sm transition-all hover:bg-ink lg:opacity-0 lg:group-hover/viewer:opacity-100 lg:focus-visible:opacity-100"
+                >
+                  <ChevronRight size={18} />
+                </button>
+
+                <span className="absolute right-3 top-3 rounded-full bg-ink/70 px-2.5 py-1 text-xs tabular-nums text-bone backdrop-blur-sm">
+                  {frame + 1} / {active.photos.length}
+                </span>
+              </div>
+
+              <div className="mt-3 grid grid-cols-4 gap-2 sm:grid-cols-6">
+                {active.photos.map((p, i) => (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => setFrame(i)}
+                    aria-label={`Fotografie ${i + 1} z ${active.photos.length}`}
+                    aria-current={i === frame}
+                    className={cn(
+                      "relative aspect-[3/2] overflow-hidden rounded-lg border transition-all",
+                      i === frame
+                        ? "border-bone opacity-100"
+                        : "border-ink-edge opacity-55 hover:opacity-90"
+                    )}
+                  >
+                    <Image
+                      src={photo(p)}
+                      alt=""
+                      fill
+                      sizes="100px"
+                      className="object-cover"
+                    />
+                  </button>
+                ))}
               </div>
             </div>
           </Reveal>

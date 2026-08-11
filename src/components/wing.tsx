@@ -6,266 +6,345 @@ import { useId } from "react";
 /* ---------------------------------------------------------------------------
    The signature.
 
-   A dragonfly wing, drawn rather than photographed. The venation is generated
-   from the wing's own geometry — longitudinal veins fanning from the base,
-   cross veins knitting them into the irregular net a real wing has — so the
-   figure is a wing rather than an ornament that resembles one.
+   A dragonfly seen from above, drawn rather than photographed: head, thorax, a
+   segmented abdomen, and four wings — a long narrow forewing and a broader
+   hindwing on each side. The venation inside each wing is generated from that
+   wing's own geometry (longitudinal veins fanning from the root, cross veins
+   knitting them into a net), so the figure is a dragonfly rather than an
+   ornament that gestures at one.
 
-   Everything here is deterministic. No Math.random(), because the server and
-   the client must agree on every coordinate.
+   Everything is deterministic. No Math.random(), because the server and the
+   client must agree on every coordinate.
 --------------------------------------------------------------------------- */
 
-const LENGTH = 420;
-const CENTER_Y = 62;
-const MAX_HALF_WIDTH = 46;
+const VB_W = 460;
+const VB_H = 320;
+const AXIS_Y = 160;
 
-/** Leading edge is flatter than the trailing edge, as on the real insect. */
-const LEADING = 0.78;
-const TRAILING = 1.22;
-
-const SHAPE_A = 0.42;
-const SHAPE_B = 0.28;
-/** t at which the width profile peaks, and the peak value, for normalisation */
+/** Width profile along a wing: narrow root, broad middle, rounded tip. */
+const SHAPE_A = 0.45;
+const SHAPE_B = 0.3;
 const PEAK_T = SHAPE_A / (SHAPE_A + SHAPE_B);
 const PEAK = PEAK_T ** SHAPE_A * (1 - PEAK_T) ** SHAPE_B;
 
-function halfWidth(t: number) {
+type WingSpec = {
+  /** where the wing meets the thorax */
+  ox: number;
+  oy: number;
+  /** degrees; 0 = toward the tail, -90 = straight up */
+  angle: number;
+  len: number;
+  halfWidth: number;
+  /** leading edge is flatter than the trailing edge */
+  lead: number;
+  trail: number;
+};
+
+/**
+ * Forewings attach forward on the thorax and sweep slightly toward the head;
+ * hindwings attach behind, are broader at the root, and sweep toward the tail.
+ */
+const WINGS: WingSpec[] = [
+  { ox: 128, oy: 150, angle: -103, len: 178, halfWidth: 27, lead: 0.72, trail: 1.28 },
+  { ox: 148, oy: 156, angle: -68, len: 158, halfWidth: 33, lead: 0.78, trail: 1.22 },
+  { ox: 128, oy: 170, angle: 103, len: 178, halfWidth: 27, lead: 0.72, trail: 1.28 },
+  { ox: 148, oy: 164, angle: 68, len: 158, halfWidth: 33, lead: 0.78, trail: 1.22 },
+];
+
+function halfWidthAt(t: number, max: number) {
   if (t <= 0 || t >= 1) return 0;
-  return (MAX_HALF_WIDTH * (t ** SHAPE_A * (1 - t) ** SHAPE_B)) / PEAK;
+  return (max * (t ** SHAPE_A * (1 - t) ** SHAPE_B)) / PEAK;
 }
 
-/** Slight upward sweep along the length. */
-function centreY(t: number) {
-  return CENTER_Y - 8 * Math.sin(Math.PI * t);
+/**
+ * A point inside a wing. `t` runs root→tip, `u` runs leading edge→trailing
+ * edge. Computed in wing-local space, then rotated onto the body.
+ */
+function wingPoint(w: WingSpec, t: number, u: number): [number, number] {
+  const hw = halfWidthAt(t, w.halfWidth);
+  const along = t * w.len;
+  // a slight curve so the wing is not a straight blade
+  const bow = Math.sin(Math.PI * t) * 5;
+  const across = -w.lead * hw + u * (w.lead + w.trail) * hw + bow;
+
+  const r = (w.angle * Math.PI) / 180;
+  const cos = Math.cos(r);
+  const sin = Math.sin(r);
+  return [
+    w.ox + along * cos - across * sin,
+    w.oy + along * sin + across * cos,
+  ];
 }
 
-/** u = 0 is the leading edge, u = 1 the trailing edge. */
-function pointAt(t: number, u: number): [number, number] {
-  const hw = halfWidth(t);
-  const y = centreY(t) - LEADING * hw + u * (LEADING + TRAILING) * hw;
-  return [t * LENGTH, y];
-}
-
-/** Deterministic jitter in [-1, 1] — stands in for a seeded PRNG. */
-function wobble(seed: number) {
-  return Math.sin(seed * 12.9898) * 43758.5453 % 1;
-}
-
-function toPath(points: [number, number][]) {
-  return points
+function toPath(points: [number, number][], close = false) {
+  const d = points
     .map(([x, y], i) => `${i === 0 ? "M" : "L"}${x.toFixed(1)},${y.toFixed(1)}`)
     .join(" ");
+  return close ? `${d} Z` : d;
 }
 
-/** The wing outline, leading edge out and trailing edge back. */
-function outlinePath() {
-  const steps = 96;
-  const top: [number, number][] = [];
-  const bottom: [number, number][] = [];
+function outlineOf(w: WingSpec) {
+  const steps = 60;
+  const lead: [number, number][] = [];
+  const trail: [number, number][] = [];
   for (let i = 0; i <= steps; i++) {
     const t = i / steps;
-    top.push(pointAt(t, 0));
-    bottom.push(pointAt(t, 1));
+    lead.push(wingPoint(w, t, 0));
+    trail.push(wingPoint(w, t, 1));
   }
-  return `${toPath(top)} ${toPath(bottom.reverse()).replace("M", "L")} Z`;
+  return toPath([...lead, ...trail.reverse()], true);
 }
 
-const VEIN_U = [0, 0.16, 0.33, 0.5, 0.66, 0.83, 1];
+const VEIN_U = [0, 0.22, 0.45, 0.68, 1];
 
-/** Longitudinal veins, fanning from the narrow base out to the tip. */
-function longitudinalPaths() {
-  const steps = 64;
+function veinsOf(w: WingSpec) {
+  const steps = 40;
   return VEIN_U.map((u) => {
     const pts: [number, number][] = [];
-    for (let i = 0; i <= steps; i++) {
-      const t = i / steps;
-      pts.push(pointAt(t, u));
-    }
+    for (let i = 0; i <= steps; i++) pts.push(wingPoint(w, i / steps, u));
     return toPath(pts);
   });
 }
 
-/**
- * Cross veins, one combined path per band. Each band's samples are phase-offset
- * from its neighbour so the cells stagger instead of lining up into a grid.
- */
-function crossPaths() {
-  const paths: string[] = [];
+/** Cross veins, one combined path per band between neighbouring veins. */
+function crossOf(w: WingSpec) {
+  const bands: string[] = [];
   for (let k = 0; k < VEIN_U.length - 1; k++) {
-    const uA = VEIN_U[k];
-    const uB = VEIN_U[k + 1];
-    const segments: string[] = [];
-    const phase = (k % 2) * 0.022 + wobble(k + 1) * 0.006;
-    for (let t = 0.08 + phase; t < 0.965; t += 0.041) {
-      // slant each rung slightly, the way real cross veins lean toward the tip
-      const lean = 0.012 + wobble(k * 7 + t * 130) * 0.005;
-      const [x1, y1] = pointAt(t, uA);
-      const [x2, y2] = pointAt(Math.min(t + lean, 0.999), uB);
-      segments.push(
+    const segs: string[] = [];
+    const phase = (k % 2) * 0.03;
+    for (let t = 0.1 + phase; t < 0.95; t += 0.062) {
+      const [x1, y1] = wingPoint(w, t, VEIN_U[k]);
+      const [x2, y2] = wingPoint(w, Math.min(t + 0.018, 0.995), VEIN_U[k + 1]);
+      segs.push(
         `M${x1.toFixed(1)},${y1.toFixed(1)} L${x2.toFixed(1)},${y2.toFixed(1)}`
       );
     }
-    paths.push(segments.join(" "));
+    bands.push(segs.join(" "));
   }
-  return paths;
+  return bands;
 }
 
 /** The pterostigma — the opaque cell near the leading edge, close to the tip. */
-function pterostigmaPath() {
-  const a = pointAt(0.79, 0.02);
-  const b = pointAt(0.87, 0.02);
-  const c = pointAt(0.87, 0.13);
-  const d = pointAt(0.79, 0.13);
-  return `M${a[0].toFixed(1)},${a[1].toFixed(1)} L${b[0].toFixed(1)},${b[1].toFixed(
-    1
-  )} L${c[0].toFixed(1)},${c[1].toFixed(1)} L${d[0].toFixed(1)},${d[1].toFixed(1)} Z`;
+function stigmaOf(w: WingSpec) {
+  const pts = [
+    wingPoint(w, 0.78, 0.03),
+    wingPoint(w, 0.88, 0.03),
+    wingPoint(w, 0.88, 0.16),
+    wingPoint(w, 0.78, 0.16),
+  ];
+  return toPath(pts, true);
 }
 
-const OUTLINE = outlinePath();
-const LONGITUDINAL = longitudinalPaths();
-const CROSS = crossPaths();
-const PTEROSTIGMA = pterostigmaPath();
+const WING_GEOM = WINGS.map((w) => ({
+  outline: outlineOf(w),
+  veins: veinsOf(w),
+  cross: crossOf(w),
+  stigma: stigmaOf(w),
+}));
 
-type WingProps = {
+/** Head, thorax and the tapering segmented abdomen. */
+const ABDOMEN = (() => {
+  const x0 = 155;
+  const x1 = 436;
+  const top: [number, number][] = [];
+  const bottom: [number, number][] = [];
+  const steps = 40;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const x = x0 + (x1 - x0) * t;
+    // thick at the base, pinched, then slightly clubbed at the tip
+    const r = 9 * (1 - t) ** 0.75 + 2.6 + 1.6 * Math.sin(Math.PI * t ** 2.2);
+    top.push([x, AXIS_Y - r]);
+    bottom.push([x, AXIS_Y + r]);
+  }
+  return toPath([...top, ...bottom.reverse()], true);
+})();
+
+const SEGMENTS = Array.from({ length: 8 }, (_, i) => {
+  const t = (i + 1) / 9;
+  const x = 155 + (436 - 155) * t;
+  const r = 9 * (1 - t) ** 0.75 + 2.6 + 1.6 * Math.sin(Math.PI * t ** 2.2);
+  return `M${x.toFixed(1)},${(AXIS_Y - r).toFixed(1)} L${x.toFixed(1)},${(
+    AXIS_Y + r
+  ).toFixed(1)}`;
+}).join(" ");
+
+type DragonflyProps = {
   className?: string;
-  /** play the draw-in animation; off for the small decorative instances */
   animate?: boolean;
-  /** seconds before the draw begins */
   delay?: number;
 };
 
-export function Wing({ className, animate = true, delay = 0 }: WingProps) {
-  const gradientId = useId();
+export function Wing({ className, animate = true, delay = 0 }: DragonflyProps) {
+  const gid = useId();
   const reduced = useReducedMotion();
-  const shouldAnimate = animate && !reduced;
+  const on = animate && !reduced;
 
-  const draw = (i: number, total: number, duration: number) =>
-    shouldAnimate
+  const draw = (order: number, duration: number) =>
+    on
       ? {
           initial: { pathLength: 0, opacity: 0 },
           animate: { pathLength: 1, opacity: 1 },
           transition: {
             pathLength: {
               duration,
-              delay: delay + (i / total) * 0.6,
+              delay: delay + order * 0.09,
               ease: [0.22, 1, 0.36, 1] as const,
             },
-            opacity: { duration: 0.3, delay: delay + (i / total) * 0.6 },
+            opacity: { duration: 0.35, delay: delay + order * 0.09 },
           },
         }
       : {};
 
   return (
-    <svg
-      viewBox={`-6 0 ${LENGTH + 12} 124`}
-      fill="none"
-      aria-hidden="true"
-      className={className}
-    >
+    <svg viewBox={`0 0 ${VB_W} ${VB_H}`} fill="none" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0.4">
+        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
           <stop offset="0%" stopColor="#3fa89b" />
           <stop offset="46%" stopColor="#6e5a9e" />
           <stop offset="100%" stopColor="#b98a4e" />
         </linearGradient>
       </defs>
 
-      {/* membrane */}
-      <motion.path
-        d={OUTLINE}
-        fill={`url(#${gradientId})`}
-        initial={shouldAnimate ? { opacity: 0 } : false}
-        animate={shouldAnimate ? { opacity: 0.05 } : { opacity: 0.05 }}
-        transition={{ duration: 1.1, delay: delay + 0.5 }}
-      />
-
-      {/* cross veins first, so the longitudinals sit over them */}
-      {CROSS.map((d, i) => (
-        <motion.path
-          key={`c${i}`}
-          d={d}
-          stroke={`url(#${gradientId})`}
-          strokeWidth={0.5}
-          strokeOpacity={0.42}
-          {...draw(i, CROSS.length, 1.0)}
-        />
+      {WING_GEOM.map((g, wi) => (
+        <g key={wi}>
+          <motion.path
+            d={g.outline}
+            fill={`url(#${gid})`}
+            initial={on ? { opacity: 0 } : false}
+            animate={{ opacity: 0.06 }}
+            transition={{ duration: 1, delay: delay + 0.55 + wi * 0.08 }}
+          />
+          {g.cross.map((d, i) => (
+            <motion.path
+              key={`c${i}`}
+              d={d}
+              stroke={`url(#${gid})`}
+              strokeWidth={0.5}
+              strokeOpacity={0.4}
+              {...draw(wi * 0.6 + i * 0.12, 0.9)}
+            />
+          ))}
+          {g.veins.map((d, i) => (
+            <motion.path
+              key={`v${i}`}
+              d={d}
+              stroke={`url(#${gid})`}
+              strokeWidth={i === 0 ? 1 : 0.7}
+              strokeOpacity={i === 0 ? 0.8 : 0.55}
+              strokeLinecap="round"
+              {...draw(wi * 0.6 + i * 0.1, 1.1)}
+            />
+          ))}
+          <motion.path
+            d={g.outline}
+            stroke={`url(#${gid})`}
+            strokeWidth={1.1}
+            strokeOpacity={0.75}
+            {...draw(wi * 0.5, 1.3)}
+          />
+          <motion.path
+            d={g.stigma}
+            fill={`url(#${gid})`}
+            initial={on ? { opacity: 0 } : false}
+            animate={{ opacity: 0.7 }}
+            transition={{ duration: 0.4, delay: delay + 1.5 + wi * 0.06 }}
+          />
+        </g>
       ))}
 
-      {LONGITUDINAL.map((d, i) => (
-        <motion.path
-          key={`l${i}`}
-          d={d}
-          stroke={`url(#${gradientId})`}
-          strokeWidth={i === 0 ? 1.1 : 0.75}
-          strokeOpacity={i === 0 ? 0.85 : 0.6}
-          strokeLinecap="round"
-          {...draw(i, LONGITUDINAL.length, 1.3)}
-        />
-      ))}
-
+      {/* body */}
       <motion.path
-        d={OUTLINE}
-        stroke={`url(#${gradientId})`}
+        d={ABDOMEN}
+        fill={`url(#${gid})`}
+        fillOpacity={0.16}
+        stroke={`url(#${gid})`}
         strokeWidth={1.1}
-        strokeOpacity={0.75}
-        {...draw(0, 1, 1.6)}
+        strokeOpacity={0.85}
+        {...draw(0.2, 1.2)}
+      />
+      <motion.path
+        d={SEGMENTS}
+        stroke={`url(#${gid})`}
+        strokeWidth={0.6}
+        strokeOpacity={0.5}
+        {...draw(1.6, 0.8)}
       />
 
-      <motion.path
-        d={PTEROSTIGMA}
-        fill={`url(#${gradientId})`}
-        initial={shouldAnimate ? { opacity: 0 } : false}
-        animate={{ opacity: 0.7 }}
-        transition={{ duration: 0.5, delay: delay + 1.5 }}
+      {/* thorax */}
+      <motion.ellipse
+        cx={140}
+        cy={160}
+        rx={24}
+        ry={15}
+        fill={`url(#${gid})`}
+        fillOpacity={0.2}
+        stroke={`url(#${gid})`}
+        strokeWidth={1.1}
+        strokeOpacity={0.85}
+        initial={on ? { opacity: 0, scale: 0.9 } : false}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5, delay: delay + 0.15 }}
+        style={{ transformOrigin: "140px 160px" }}
       />
+
+      {/* head, with the two big compound eyes */}
+      <motion.g
+        initial={on ? { opacity: 0 } : false}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: delay + 0.05 }}
+      >
+        <circle
+          cx={102}
+          cy={160}
+          r={15}
+          fill={`url(#${gid})`}
+          fillOpacity={0.2}
+          stroke={`url(#${gid})`}
+          strokeWidth={1.1}
+          strokeOpacity={0.85}
+        />
+        <circle cx={96} cy={152} r={7.5} fill={`url(#${gid})`} fillOpacity={0.55} />
+        <circle cx={96} cy={168} r={7.5} fill={`url(#${gid})`} fillOpacity={0.55} />
+      </motion.g>
     </svg>
   );
 }
 
 /**
- * Small, static wing used as a section marker.
- *
- * The full venation collapses into a smudge below roughly 80px wide, so this
- * draws a reduced figure — outline, three veins, pterostigma — at weights that
- * survive being 12px tall.
+ * The section marker. Below roughly 80px wide the venation collapses into a
+ * smudge, so this keeps only the silhouette — four wings, a body, a head — at
+ * weights that survive being 14px tall. The viewBox aspect is preserved; the
+ * earlier version stretched it and read as a rectangle.
  */
 export function WingMark({ className }: { className?: string }) {
-  const gradientId = useId();
-  const veins = [LONGITUDINAL[0], LONGITUDINAL[3], LONGITUDINAL[6]];
+  const gid = useId();
 
   return (
-    <svg
-      viewBox={`-6 0 ${LENGTH + 12} 124`}
-      fill="none"
-      aria-hidden="true"
-      preserveAspectRatio="none"
-      className={className}
-    >
+    <svg viewBox={`70 20 380 280`} fill="none" aria-hidden="true" className={className}>
       <defs>
-        <linearGradient id={gradientId} x1="0" y1="0" x2="1" y2="0.4">
+        <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
           <stop offset="0%" stopColor="#3fa89b" />
           <stop offset="46%" stopColor="#6e5a9e" />
           <stop offset="100%" stopColor="#b98a4e" />
         </linearGradient>
       </defs>
 
-      <path d={OUTLINE} fill={`url(#${gradientId})`} opacity={0.12} />
-      {veins.map((d, i) => (
+      {WING_GEOM.map((g, i) => (
         <path
           key={i}
-          d={d}
-          stroke={`url(#${gradientId})`}
-          strokeWidth={2.4}
-          strokeOpacity={0.9}
-          strokeLinecap="round"
+          d={g.outline}
+          fill={`url(#${gid})`}
+          fillOpacity={0.22}
+          stroke={`url(#${gid})`}
+          strokeWidth={5}
+          strokeOpacity={0.95}
+          strokeLinejoin="round"
         />
       ))}
-      <path
-        d={OUTLINE}
-        stroke={`url(#${gradientId})`}
-        strokeWidth={2.6}
-        strokeOpacity={0.95}
-      />
+      <path d={ABDOMEN} fill={`url(#${gid})`} fillOpacity={0.9} />
+      <ellipse cx={140} cy={160} rx={24} ry={15} fill={`url(#${gid})`} />
+      <circle cx={104} cy={160} r={16} fill={`url(#${gid})`} />
     </svg>
   );
 }

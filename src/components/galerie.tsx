@@ -122,7 +122,7 @@ export function Galerie() {
                 transition={{ duration: 0.3, delay: Math.min(index * 0.02, 0.3) }}
                 onClick={() => open(index)}
                 aria-label={`Zvětšit: ${item.alt}`}
-                className="group relative aspect-square overflow-hidden rounded-sm border border-ink-edge"
+                className="group relative aspect-square overflow-hidden rounded-xl border border-ink-edge"
               >
                 <Image
                   src={photo(item.slug)}

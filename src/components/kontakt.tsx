@@ -88,9 +88,9 @@ export function SiteFooter() {
     <footer className="relative overflow-hidden border-t border-ink-edge">
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-16 -left-20 w-[520px] opacity-25 sm:w-[680px]"
+        className="pointer-events-none absolute -bottom-24 -left-28 w-[440px] opacity-20 sm:w-[560px]"
       >
-        <Wing animate={false} className="w-full -scale-y-100" />
+        <Wing animate={false} className="w-full -scale-x-100 rotate-12" />
       </div>
 
       <div className="relative mx-auto max-w-6xl px-5 py-14 sm:px-8">
