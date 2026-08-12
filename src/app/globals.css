@@ -1,29 +1,43 @@
 @import "tailwindcss";
 
 /* ---------------------------------------------------------------------------
-   Ubytování Vážka — design tokens
+   Ubytování Vážka — design tokens (SVĚTLÁ VARIANTA)
 
-   The palette comes from the insect the house is named after: a dragonfly wing
-   shifts teal → violet → bronze depending on the angle it catches light. That
-   iridescence is the accent system. It never appears as a flat fill — only as
-   a gradient across a stroke, a rule, or a hover state.
+   The palette still comes from the insect the house is named after: a dragonfly
+   wing shifts teal → violet → bronze depending on the angle it catches light.
+   That iridescence remains the accent system, and it never appears as a flat
+   fill — only as a gradient across a stroke, a rule, or a hover state.
 
-   The ground is pond-water ink rather than black, so the rooms' own strong
-   colours (pink, green, red) read as jewel tones set into it instead of
-   fighting it.
+   What changes here is the ground. This variant sits on pale river stone — a
+   cool near-white with a green cast, taken from the shallows rather than the
+   deep water. Two consequences drive every other value below:
+
+   1. The accents have to carry far more pigment. The dark version's teal and
+      bronze were mid-tones glowing out of shadow; on pale stone the same
+      values would wash out, so each is deepened to hold contrast against the
+      page rather than against ink.
+
+   2. The rooms' strong colours (pink, green, red) no longer read as jewels set
+      into darkness — on a light page they shout. The photo grade on this
+      branch is lifted and calmed to match, and every photo is bounded by a
+      visible edge so it sits on the page instead of punching a hole in it.
+
+   The token NAMES are kept from the dark variant on purpose: `ink` means "the
+   page", `bone` means "what is written on it". Keeping them means the two
+   variants differ by this block alone and stay easy to compare.
 --------------------------------------------------------------------------- */
 
 @theme {
-  --color-ink: #0c1917;
-  --color-ink-raised: #11201e;
-  --color-ink-edge: #1b302c;
-  --color-bone: #ede7dc;
-  --color-bone-dim: #a5aeA8;
-  --color-bone-faint: #74827b;
+  --color-ink: #e8ece7;
+  --color-ink-raised: #f2f5f0;
+  --color-ink-edge: #ccd4cb;
+  --color-bone: #12211e;
+  --color-bone-dim: #4c5b55;
+  --color-bone-faint: #5f6e67;
 
-  --color-teal: #3fa89b;
-  --color-violet: #6e5a9e;
-  --color-bronze: #b98a4e;
+  --color-teal: #1b6f63;
+  --color-violet: #4e3d82;
+  --color-bronze: #8a5c22;
 
   --font-display: var(--font-bodoni), "Times New Roman", serif;
   --font-body: var(--font-archivo), system-ui, sans-serif;
@@ -87,7 +101,8 @@
     var(--color-bronze) 82%,
     transparent 100%
   );
-  opacity: 0.5;
+  /* a hairline loses more to a pale page than to a dark one */
+  opacity: 0.85;
 }
 
 @utility iridescent-text {

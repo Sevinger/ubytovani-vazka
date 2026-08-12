@@ -242,9 +242,9 @@ export function Wing({ className, animate = true, delay = 0 }: DragonflyProps) {
     <svg viewBox={VIEW_BOX.box} fill="none" aria-hidden="true" className={className}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
-          <stop offset="0%" stopColor="#3fa89b" />
-          <stop offset="46%" stopColor="#6e5a9e" />
-          <stop offset="100%" stopColor="#b98a4e" />
+          <stop offset="0%" stopColor="var(--color-teal)" />
+          <stop offset="46%" stopColor="var(--color-violet)" />
+          <stop offset="100%" stopColor="var(--color-bronze)" />
         </linearGradient>
       </defs>
 
@@ -366,9 +366,9 @@ export function WingMark({ className }: { className?: string }) {
     <svg viewBox={VIEW_BOX.box} fill="none" aria-hidden="true" className={className}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
-          <stop offset="0%" stopColor="#3fa89b" />
-          <stop offset="46%" stopColor="#6e5a9e" />
-          <stop offset="100%" stopColor="#b98a4e" />
+          <stop offset="0%" stopColor="var(--color-teal)" />
+          <stop offset="46%" stopColor="var(--color-violet)" />
+          <stop offset="100%" stopColor="var(--color-bronze)" />
         </linearGradient>
       </defs>
 
