@@ -13,12 +13,12 @@ export function Kontakt() {
   return (
     <section
       id="kontakt"
-      className="scroll-mt-24 border-t border-ink-edge py-24 sm:py-32"
+      className="scroll-mt-24 border-t border-ink-edge py-14 sm:py-24 lg:py-32"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading eyebrow="Kontakt" title="Kde nás najdete" />
 
-        <div className="mt-14 grid gap-12 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-10 sm:mt-14 sm:grid-cols-2 sm:gap-12 lg:grid-cols-3">
           <Reveal>
             <h3 className="eyebrow">Adresa</h3>
             <a
@@ -88,7 +88,7 @@ export function SiteFooter() {
     <footer className="relative overflow-hidden border-t border-ink-edge">
       <div
         aria-hidden
-        className="pointer-events-none absolute -bottom-24 -left-28 w-[440px] opacity-20 sm:w-[560px]"
+        className="pointer-events-none absolute -bottom-6 left-0 w-[240px] opacity-15 sm:bottom-0 sm:w-[320px]"
       >
         <Wing animate={false} className="w-full -scale-x-100 rotate-12" />
       </div>

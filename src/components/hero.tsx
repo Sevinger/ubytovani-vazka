@@ -24,12 +24,13 @@ export function Hero() {
   return (
     <section
       id="top"
-      className="relative overflow-hidden pt-32 pb-20 sm:pt-40 sm:pb-28"
+      className="relative overflow-hidden pt-28 pb-12 sm:pt-40 sm:pb-24"
     >
-      {/* the wing sits behind the title, bled off the right edge */}
+      {/* sits behind the title; kept fully inside the section, since the
+          section clips its overflow and a bled wing reads as a broken one */}
       <div
         aria-hidden
-        className="pointer-events-none absolute -right-28 top-24 w-[460px] max-w-none opacity-40 sm:-right-16 sm:top-16 sm:w-[600px] lg:-right-4 lg:top-10 lg:w-[720px]"
+        className="pointer-events-none absolute right-3 top-2 w-[275px] max-w-none opacity-25 sm:right-5 sm:top-4 sm:w-[400px] sm:opacity-35 lg:right-8 lg:w-[530px] lg:opacity-40"
       >
         <Wing delay={0.35} className="w-full" />
       </div>
@@ -72,7 +73,7 @@ export function Hero() {
         <motion.a
           {...rise(4)}
           href="#ubytovani"
-          className="mt-20 inline-flex items-center gap-2 text-sm text-bone-faint transition-colors hover:text-bone"
+          className="mt-12 inline-flex items-center gap-2 text-sm text-bone-faint transition-colors hover:text-bone sm:mt-16"
         >
           <ArrowDown size={14} />
           Prohlédnout pokoje

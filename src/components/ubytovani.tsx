@@ -29,7 +29,7 @@ export function Ubytovani() {
   );
 
   return (
-    <section id="ubytovani" className="scroll-mt-24 py-24 sm:py-32">
+    <section id="ubytovani" className="scroll-mt-24 py-14 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Ubytování"
@@ -37,7 +37,7 @@ export function Ubytovani() {
           lede="Od apartmánu s vlastní kuchyní po úsporný pokoj s oddělenými lůžky. Každý pokoj má svůj vlastní charakter — a svoji barvu."
         />
 
-        <div className="mt-14 grid gap-10 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
+        <div className="mt-10 grid gap-8 sm:mt-14 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] lg:gap-14">
           {/* selector */}
           <Reveal className="order-2 lg:order-1">
             <ul className="flex flex-col">

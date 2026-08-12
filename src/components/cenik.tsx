@@ -4,7 +4,7 @@ import { SectionHeading } from "./section-heading";
 
 export function Cenik() {
   return (
-    <section id="cenik" className="scroll-mt-24 border-t border-ink-edge py-24 sm:py-32">
+    <section id="cenik" className="scroll-mt-24 border-t border-ink-edge py-14 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Ceník"
@@ -12,7 +12,7 @@ export function Cenik() {
           lede="Co je v tabulce, to zaplatíte. Žádné příplatky za povlečení ani za úklid."
         />
 
-        <div className="mt-14">
+        <div className="mt-10 sm:mt-14">
           {rooms.map((room, i) => (
             <Reveal key={room.id} delay={i * 0.06}>
               <div className="grid grid-cols-[1fr_auto] items-baseline gap-4 border-t border-ink-edge py-6 sm:grid-cols-[1fr_auto_auto] sm:gap-10">

@@ -81,7 +81,7 @@ export function Rezervace() {
   return (
     <section
       id="rezervace"
-      className="scroll-mt-24 border-t border-ink-edge py-24 sm:py-32"
+      className="scroll-mt-24 border-t border-ink-edge py-14 sm:py-24 lg:py-32"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,0.85fr)_minmax(0,1fr)] lg:gap-20">

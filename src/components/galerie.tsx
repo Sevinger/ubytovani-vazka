@@ -71,7 +71,7 @@ export function Galerie() {
   return (
     <section
       id="galerie"
-      className="scroll-mt-24 border-t border-ink-edge py-24 sm:py-32"
+      className="scroll-mt-24 border-t border-ink-edge py-14 sm:py-24 lg:py-32"
     >
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
@@ -83,7 +83,7 @@ export function Galerie() {
         <div
           role="group"
           aria-label="Filtr fotografií"
-          className="mt-10 flex flex-wrap gap-2"
+          className="mt-8 flex flex-wrap gap-2 sm:mt-10"
         >
           {GROUPS.map((g) => (
             <button

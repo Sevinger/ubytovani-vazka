@@ -17,8 +17,6 @@ import { useId } from "react";
    client must agree on every coordinate.
 --------------------------------------------------------------------------- */
 
-const VB_W = 460;
-const VB_H = 320;
 const AXIS_Y = 160;
 
 /** Width profile along a wing: narrow root, broad middle, rounded tip. */
@@ -169,6 +167,50 @@ const SEGMENTS = Array.from({ length: 8 }, (_, i) => {
   ).toFixed(1)}`;
 }).join(" ");
 
+/**
+ * The viewBox is measured from the geometry rather than guessed. The wings
+ * reach well above and below the body, so a hand-written box clipped their
+ * tips — and would clip them again the moment any wing angle changed.
+ */
+const VIEW_BOX = (() => {
+  let minX = Infinity;
+  let maxX = -Infinity;
+  let minY = Infinity;
+  let maxY = -Infinity;
+
+  const see = (x: number, y: number) => {
+    if (x < minX) minX = x;
+    if (x > maxX) maxX = x;
+    if (y < minY) minY = y;
+    if (y > maxY) maxY = y;
+  };
+
+  for (const w of WINGS) {
+    for (let i = 0; i <= 100; i++) {
+      const t = i / 100;
+      see(...wingPoint(w, t, 0));
+      see(...wingPoint(w, t, 1));
+    }
+  }
+  // head circle, thorax ellipse and the abdomen tip
+  see(102 - 16, AXIS_Y - 16);
+  see(102 + 16, AXIS_Y + 16);
+  see(140 - 24, AXIS_Y - 15);
+  see(140 + 24, AXIS_Y + 15);
+  see(436, AXIS_Y);
+
+  const pad = 8; // room for the outline stroke itself
+  return {
+    box: `${(minX - pad).toFixed(1)} ${(minY - pad).toFixed(1)} ${(
+      maxX - minX + pad * 2
+    ).toFixed(1)} ${(maxY - minY + pad * 2).toFixed(1)}`,
+    ratio: (maxX - minX + pad * 2) / (maxY - minY + pad * 2),
+  };
+})();
+
+/** Width ÷ height of the drawing, so callers can size it without distortion. */
+export const WING_ASPECT = VIEW_BOX.ratio;
+
 type DragonflyProps = {
   className?: string;
   animate?: boolean;
@@ -197,7 +239,7 @@ export function Wing({ className, animate = true, delay = 0 }: DragonflyProps) {
       : {};
 
   return (
-    <svg viewBox={`0 0 ${VB_W} ${VB_H}`} fill="none" aria-hidden="true" className={className}>
+    <svg viewBox={VIEW_BOX.box} fill="none" aria-hidden="true" className={className}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
           <stop offset="0%" stopColor="#3fa89b" />
@@ -321,7 +363,7 @@ export function WingMark({ className }: { className?: string }) {
   const gid = useId();
 
   return (
-    <svg viewBox={`70 20 380 280`} fill="none" aria-hidden="true" className={className}>
+    <svg viewBox={VIEW_BOX.box} fill="none" aria-hidden="true" className={className}>
       <defs>
         <linearGradient id={gid} x1="0" y1="0" x2="1" y2="0.5">
           <stop offset="0%" stopColor="#3fa89b" />

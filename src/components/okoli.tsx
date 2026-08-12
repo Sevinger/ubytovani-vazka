@@ -8,7 +8,7 @@ import { SectionHeading } from "./section-heading";
  */
 export function Okoli() {
   return (
-    <section id="okoli" className="scroll-mt-24 border-t border-ink-edge py-24 sm:py-32">
+    <section id="okoli" className="scroll-mt-24 border-t border-ink-edge py-14 sm:py-24 lg:py-32">
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Kam na výlet"
@@ -16,7 +16,7 @@ export function Okoli() {
           lede="Mohelnice leží mezi Olomoucí a Jeseníky. Z většiny míst v okolí jste zpátky na oběd."
         />
 
-        <ul className="mt-14 grid gap-x-10 sm:grid-cols-2">
+        <ul className="mt-10 grid gap-x-10 sm:mt-14 sm:grid-cols-2">
           {trips.map((trip, i) => (
             <li key={trip.name}>
               <Reveal delay={(i % 2) * 0.05}>
