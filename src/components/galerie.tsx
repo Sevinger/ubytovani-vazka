@@ -76,7 +76,7 @@ export function Galerie() {
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Fotogalerie"
-          title="Dům tak, jak vypadá"
+          title="Jak vypadá ubytování?"
           lede="Nic přifouknutého. Fotografie z pokojů, kuchyní a koupelen v takovém stavu, v jakém je najdete."
         />
 

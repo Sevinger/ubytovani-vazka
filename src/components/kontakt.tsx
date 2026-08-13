@@ -1,14 +1,16 @@
 import { Mail, MapPin, Phone } from "lucide-react";
+import Image from "next/image";
 
 import { contact, operator } from "@/lib/content";
+import { photo } from "@/lib/utils";
 import { Reveal } from "./reveal";
 import { SectionHeading } from "./section-heading";
 import { Wing } from "./wing";
 
 export function Kontakt() {
-  const mapHref = `https://mapy.cz/zakladni?q=${encodeURIComponent(
-    `${contact.street}, ${contact.city}`
-  )}`;
+  // Search by coordinates rather than by street, so the pin lands on the house
+  // itself instead of wherever Google decides to place the street number.
+  const mapHref = `https://www.google.com/maps/search/?api=1&query=${contact.lat},${contact.lon}`;
 
   return (
     <section
@@ -18,7 +20,27 @@ export function Kontakt() {
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading eyebrow="Kontakt" title="Kde nás najdete" />
 
-        <div className="mt-10 grid gap-10 sm:mt-14 sm:grid-cols-2 sm:gap-12 lg:grid-cols-3">
+        <Reveal>
+          <a
+            href={mapHref}
+            target="_blank"
+            rel="noreferrer"
+            className="group mt-10 block overflow-hidden rounded-2xl border border-ink-edge sm:mt-14"
+          >
+            <div className="relative aspect-[3/2] sm:aspect-[16/7]">
+              <Image
+                src={photo("penzion-exterier")}
+                alt="Penzion Vážka z ulice Olomoucká — vstup s dřevěným přístřeškem"
+                fill
+                sizes="(max-width: 1152px) 100vw, 1088px"
+                quality={88}
+                className="object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+              />
+            </div>
+          </a>
+        </Reveal>
+
+        <div className="mt-10 grid gap-10 sm:grid-cols-2 sm:gap-12 lg:grid-cols-3">
           <Reveal>
             <h3 className="eyebrow">Adresa</h3>
             <a

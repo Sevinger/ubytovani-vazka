@@ -216,10 +216,6 @@ export const galleryPhotos: { slug: string; alt: string; group: string }[] = [
   { slug: "koupelna-sklo", alt: "Prosklený sprchový kout", group: "Koupelny" },
   { slug: "koupelna-cernobila", alt: "Koupelna v černobílém obkladu", group: "Koupelny" },
   { slug: "koupelna-radiator", alt: "Koupelna s žebříkovým radiátorem", group: "Koupelny" },
-  { slug: "detail-schodiste", alt: "Schodiště s kovaným zábradlím", group: "Dům" },
-  { slug: "detail-kvetina", alt: "Květinová dekorace v pokoji", group: "Dům" },
-  { slug: "detail-bylinky", alt: "Bylinky v okně", group: "Dům" },
-  { slug: "detail-lampa", alt: "Detail stolní lampy", group: "Dům" },
 ];
 
 /** Photos that exist only in a 480px-wide variant are excluded here. */

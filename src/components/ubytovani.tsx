@@ -33,7 +33,7 @@ export function Ubytovani() {
       <div className="mx-auto max-w-6xl px-5 sm:px-8">
         <SectionHeading
           eyebrow="Ubytování"
-          title="Čtyři způsoby, jak tu bydlet"
+          title="Čtyři možnosti ubytování"
           lede="Od apartmánu s vlastní kuchyní po úsporný pokoj s oddělenými lůžky. Každý pokoj má svůj vlastní charakter — a svoji barvu."
         />
 
