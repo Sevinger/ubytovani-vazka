@@ -27,7 +27,10 @@ export function Kontakt() {
             rel="noreferrer"
             className="group mt-10 block overflow-hidden rounded-2xl border border-ink-edge sm:mt-14"
           >
-            <div className="relative aspect-[3/2] sm:aspect-[16/7]">
+            {/* 3:2 matches the crop baked into the file, so object-cover has
+                nothing left to trim — a wider frame here cropped the entrance
+                and the canopy straight out of the picture. */}
+            <div className="relative aspect-[3/2]">
               <Image
                 src={photo("penzion-exterier")}
                 alt="Penzion Vážka z ulice Olomoucká — vstup s dřevěným přístřeškem"
